@@ -19,7 +19,7 @@ use Doctrine\Common\Annotations\Annotation;
 class DiscriminatorEntry
 {
     /**
-     * @var string|null
+     * @var string
      */
     public $value;
 }
