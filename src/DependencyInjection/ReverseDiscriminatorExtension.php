@@ -1,13 +1,14 @@
 <?php
 /**
- * CoreSystems (c) 2020
+ * CoreSystems (c) 2023
  * Author: Josh McCreight<jmccreight@shaw.ca>
  */
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace CoreSys\ReverseDiscriminator\DependencyInjection;
 
+use Exception;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -22,23 +23,22 @@ class ReverseDiscriminatorExtension extends Extension
     /**
      * @param array            $configs
      * @param ContainerBuilder $container
-     * @throws \Exception
+     * @throws Exception
      */
-    public function load( array $configs, ContainerBuilder $container )
+    public function load(array $configs, ContainerBuilder $container)
     {
         $configuration = new Configuration();
-        $this->processConfiguration( $configuration, $configs );
+        $this->processConfiguration($configuration, $configs);
 
-        $loader = new YamlFileLoader( $container, new FileLocator(
-            implode( DIRECTORY_SEPARATOR, [
+        $loader = new YamlFileLoader($container, new FileLocator(
+            implode(DIRECTORY_SEPARATOR, [
                 __DIR__,
                 '..',
                 'Resources',
                 'config'
-            ] )
-        ) );
+            ])
+        ));
 
-        $loader->load( 'services.yaml' );
+        $loader->load('services.yaml');
     }
-
 }

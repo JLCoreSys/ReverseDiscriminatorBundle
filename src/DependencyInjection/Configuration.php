@@ -1,10 +1,10 @@
 <?php
 /**
- * CoreSystems (c) 2020
+ * CoreSystems (c) 2023
  * Author: Josh McCreight<jmccreight@shaw.ca>
  */
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace CoreSys\ReverseDiscriminator\DependencyInjection;
 
@@ -22,11 +22,8 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder( 'coresys_reverse_disriminator' );
-
-        // @todo
+        $treeBuilder = new TreeBuilder('coresys_reverse_disriminator');
 
         return $treeBuilder;
     }
-
 }
