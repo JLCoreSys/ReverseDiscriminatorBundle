@@ -1,10 +1,10 @@
 <?php
 /**
- * CoreSystems (c) 2020
+ * CoreSystems (c) 2023
  * Author: Josh McCreight<jmccreight@shaw.ca>
  */
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace CoreSys\ReverseDiscriminator\Subscriber;
 
@@ -24,23 +24,13 @@ use ReflectionException;
  */
 class DiscriminatorSubscriber implements EventSubscriber
 {
-    /**
-     * @var array
-     */
-    protected $map;
-
-    /**
-     * @var array
-     */
-    protected $cachedMap;
-
-    /**
-     * @var AnnotationReader
-     */
-    protected $reader;
+    protected array $map;
+    protected array $cachedMap;
+    protected AnnotationReader $reader;
 
     /**
      * DiscriminatorSubscriber constructor.
+     *
      * @throws AnnotationException
      */
     public function __construct()
@@ -68,33 +58,31 @@ class DiscriminatorSubscriber implements EventSubscriber
      * @param LoadClassMetadataEventArgs $event
      * @throws Exception
      */
-    public function loadClassMetadata( LoadClassMetadataEventArgs $event )
+    public function loadClassMetadata(LoadClassMetadataEventArgs $event)
     {
         $this->map = [];
         $class = $event->getClassMetadata()->name;
 
-        if ( array_key_exists( $class, $this->cachedMap ) ) {
-            $this->overrideMetadata( $event, $class );
+        if (array_key_exists($class, $this->cachedMap)) {
+            $this->overrideMetadata($event, $class);
 
             return;
         }
 
-//        $discriminatorMap = $event->getClassMetadata()->discriminatorMap;
-
-        if ( $hasDiscriminatorEntry = $this->extractEntry( $class ) ) {
-            $this->checkClass( $class );
+        if ($this->extractEntry($class)) {
+            $this->checkClass($class);
         } else {
             return;
         }
 
-        $dMap = array_flip( $this->map );
+        $dMap = array_flip($this->map);
 
-        foreach ( $this->map as $className => &$discriminator ) {
-            $this->addToCachedMap( $className, 'map', $dMap )
-                ->addToCachedMap( $className, 'discr', $discriminator );
+        foreach ($this->map as $className => &$discriminator) {
+            $this->addToCachedMap($className, 'map', $dMap)
+                ->addToCachedMap($className, 'discr', $discriminator);
         }
 
-        $this->overrideMetadata( $event, $class );
+        $this->overrideMetadata($event, $class);
     }
 
     /**
@@ -103,15 +91,15 @@ class DiscriminatorSubscriber implements EventSubscriber
      * @param LoadClassMetadataEventArgs $event
      * @param string                     $class
      */
-    protected function overrideMetadata( LoadClassMetadataEventArgs $event, string $class )
+    protected function overrideMetadata(LoadClassMetadataEventArgs $event, string $class)
     {
         $event->getClassMetadata()->discriminatorMap = $this->cachedMap[ $class ][ 'map' ];
         $event->getClassMetadata()->discriminatorValue = $this->cachedMap[ $class ][ 'discr' ];
 
-        if ( isset( $this->cachedMap[ $class ][ 'isParent' ] ) && $this->cachedMap[ $class ][ 'isParent' ] ) {
+        if (isset($this->cachedMap[ $class ][ 'isParent' ]) && $this->cachedMap[ $class ][ 'isParent' ]) {
             $subClasses = $this->cachedMap[ $class ][ 'map' ];
-            unset( $subClasses[ $this->cachedMap[ $class ][ 'discr' ] ] );
-            $event->getClassMetadata()->subClasses = array_values( $subClasses );
+            unset($subClasses[ $this->cachedMap[ $class ][ 'discr' ] ]);
+            $event->getClassMetadata()->subClasses = array_values($subClasses);
         }
     }
 
@@ -120,42 +108,42 @@ class DiscriminatorSubscriber implements EventSubscriber
      *
      * @param string $class
      * @return bool
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    protected function extractEntry( string $class )
+    protected function extractEntry(string $class)
     {
-        $rc = new ReflectionClass( $class );
-        $annotation = $this->reader->getClassAnnotation( $rc, DiscriminatorEntry::class );
-        if ( !empty( $annotation ) ) {
-            if ( in_array( $value = $annotation->value, $this->map ) ) {
-                throw new Exception( sprintf( 'Duplicate discriminator map entry `%s` in `%s`', $value, $class ) );
+        $rc = new ReflectionClass($class);
+        $annotation = $this->reader->getClassAnnotation($rc, DiscriminatorEntry::class);
+        if (!empty($annotation)) {
+            if (in_array($value = $annotation->value, $this->map)) {
+                throw new Exception(sprintf('Duplicate discriminator map entry `%s` in `%s`', $value, $class));
             }
 
             $this->map[ $class ] = $value;
 
-            return TRUE;
+            return true;
         }
 
-        return FALSE;
+        return false;
     }
 
     /**
      * Check the class for mappings/annotations
      *
      * @param string $class
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    protected function checkClass( string $class )
+    protected function checkClass(string $class)
     {
-        $rc = new ReflectionClass( $class );
+        $rc = new ReflectionClass($class);
         $parent = $rc->getParentClass();
 
-        if ( !empty( $parent ) ) {
+        if (!empty($parent)) {
             $parent = $parent->name;
-            $this->checkClass( $parent );
+            $this->checkClass($parent);
         } else {
-            $this->addToCachedMap( $class, 'isParent', TRUE );
-            $this->checkClassChildren( $class );
+            $this->addToCachedMap($class, 'isParent', true);
+            $this->checkClassChildren($class);
         }
     }
 
@@ -167,14 +155,14 @@ class DiscriminatorSubscriber implements EventSubscriber
      * @param null   $value
      * @return DiscriminatorSubscriber
      */
-    protected function addToCachedMap( string $class, string $key, $value = NULL ): DiscriminatorSubscriber
+    protected function addToCachedMap(string $class, string $key, $value = null): DiscriminatorSubscriber
     {
-        if ( !is_array( $this->cachedMap ) ) {
+        if (!is_array($this->cachedMap)) {
             $this->cachedMap = [];
         }
 
-        if ( !isset( $this->cachedMap[ $class ] ) || !is_array( $this->cachedMap[ $class ] ) ) {
-            $this->cachedMap[ $class ] = [ 'isParent' => FALSE ];
+        if (!isset($this->cachedMap[ $class ]) || !is_array($this->cachedMap[ $class ])) {
+            $this->cachedMap[ $class ] = [ 'isParent' => false ];
         }
 
         $this->cachedMap[ $class ][ $key ] = $value;
@@ -188,17 +176,17 @@ class DiscriminatorSubscriber implements EventSubscriber
      * @param string $class
      * @throws ReflectionException
      */
-    public function checkClassChildren( string $class )
+    public function checkClassChildren(string $class)
     {
-        foreach ( $this->getSubClasses( $class ) as $className ) {
-            $rc = new ReflectionClass( $className );
+        foreach ($this->getSubClasses($class) as $className) {
+            $rc = new ReflectionClass($className);
             $parent = $rc->getParentClass();
-            if ( !empty( $parent ) ) {
+            if (!empty($parent)) {
                 $parent = $parent->name;
-                if ( $parent === $class ) {
-                    if ( $hasDiscriminatorEntry = $this->extractEntry( $className ) ) {
-                        if ( !array_key_exists( $className, $this->map ) ) {
-                            $this->checkClassChildren( $className );
+                if ($parent === $class) {
+                    if ($hasDiscriminatorEntry = $this->extractEntry($className)) {
+                        if (!array_key_exists($className, $this->map)) {
+                            $this->checkClassChildren($className);
                         }
                     }
                 }
@@ -213,13 +201,13 @@ class DiscriminatorSubscriber implements EventSubscriber
      * @return array
      * @throws ReflectionException
      */
-    protected function getSubClasses( string $class )
+    protected function getSubClasses(string $class)
     {
         $subClasses = [];
 
-        foreach ( get_declared_classes() as $potentialSubClass ) {
-            $rc = new ReflectionClass( $potentialSubClass );
-            if ( $rc->isSubclassOf( $class ) ) {
+        foreach (get_declared_classes() as $potentialSubClass) {
+            $rc = new ReflectionClass($potentialSubClass);
+            if ($rc->isSubclassOf($class)) {
                 $subClasses[] = $potentialSubClass;
             }
         }

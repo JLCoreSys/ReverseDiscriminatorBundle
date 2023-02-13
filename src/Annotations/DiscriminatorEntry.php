@@ -1,25 +1,23 @@
 <?php
 /**
- * CoreSystems (c) 2020
+ * CoreSystems (c) 2023
  * Author: Josh McCreight<jmccreight@shaw.ca>
  */
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace CoreSys\ReverseDiscriminator\Annotations;
 
 use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * Class ChildDiscriminator
  * @package CoreSys\ReverseDiscriminator\Annotations
- * @Annotation
- * @Annotation\Target("CLASS")
  */
+#[Annotation()]
+#[Target('CLASS')]
 class DiscriminatorEntry
 {
-    /**
-     * @var string
-     */
-    public $value;
+    public string $value;
 }
